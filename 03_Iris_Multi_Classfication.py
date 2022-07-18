@@ -1,0 +1,36 @@
+import numpy as np
+import pandas as pd
+
+from sklearn.preprocessing import LabelEncoder
+
+import tensorflow as tf
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+import tensorflow.keras.utils as np_utils
+
+import warnings
+warnings.filterwarnings('ignore')
+
+seed = 0
+np.random.seed(seed)
+tf.random.set_seed(seed)
+
+df = pd.read_csv('../data/iris.csv', names = ["sepal_length", "sepal_width",  "petal_length",  "petal_width",  "species"])
+
+le = LabelEncoder()
+df['species'] = le.fit_transform(df['species'])
+
+X = df.drop('species', axis=1).values
+y = np_utils.to_categorical(df['species'])
+
+# 최종 출력 값이 3개 중 하나여야 하므로 출력층에 노트 수를 3으로 설정
+# softmax 총합이 1인 형태로 변환해주는 활성화 함수
+model = Sequential()
+model.add(Dense(16, input_dim=4, activation='relu'))
+model.add(Dense(3, activation='softmax'))
+
+model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+
+model.fit(X, y, epochs=50, batch_size=1)
+
+print('\n Accuracy: %.4f' % (model.evaluate(X,y)[1]))
